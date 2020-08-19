@@ -1,5 +1,3 @@
-# Import hashing function for addRecord
-
 import sqlite3 as sql
 import bcrypt
 from datetime import date
