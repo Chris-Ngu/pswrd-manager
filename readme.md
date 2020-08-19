@@ -1,2 +1,2 @@
 * Allow user to confirm changed before commiting to database
-* Hash passwords to database
+* encode/ decocde password when pulling from database

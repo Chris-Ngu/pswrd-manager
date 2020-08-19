@@ -1,18 +1,18 @@
 # Import hashing function for addRecord
 
 import sqlite3 as sql
+import bcrypt
 from datetime import date
 
 connection = sql.connect('passwordDatabase.db')
 cursor = connection.cursor()
 
-
 def addRecord(domain, password):
     cleanedDomain = domain.upper()
     dateCreated = str(date.today())
     dateModified = dateCreated
-    hashed = password
-
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    
     query = f"INSERT INTO passwords(website, password, created, modified) VALUES ('{cleanedDomain}', '{hashed}', '{dateCreated}', '{dateModified}')"
     try:
         cursor.execute(query)
@@ -20,7 +20,6 @@ def addRecord(domain, password):
         print('Written to database successfully')
     except Exception as e:
         print('ERROR OCCURED WHILE WRITING TO DATABASE: ' + str(e))
-
 
 def removeRecord(domain):
     cleanedDomain = domain.upper()
@@ -32,7 +31,6 @@ def removeRecord(domain):
         print('Record has been deleted')
     except Exception as e:
         print('ERROR OCCURED WHILE DELETING TO DATABASE: ' + str(e))
-
 
 def updateRecord(domain):
     # https://www.mysqltutorial.org/mysql-exists/
@@ -47,5 +45,4 @@ def updateRecord(domain):
         choice = input('Record not found, please try again...')
         updateRecord(choice)
 
-
-updateRecord('gmail')
+addRecord('office', 'new')
