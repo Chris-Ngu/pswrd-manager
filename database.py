@@ -2,6 +2,7 @@ import sqlite3 as sql
 import bcrypt
 from datetime import date
 
+
 connection = sql.connect('passwordDatabase.db')
 cursor = connection.cursor()
 
@@ -13,14 +14,16 @@ def addRecord(domain, password):
     @desc       Takes a domain name and password combination to create a new record \n
     @returns    None \n
     '''
+
     cleanedDomain = domain.upper()
     dateCreated = str(date.today())
     dateModified = dateCreated
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
     query = f"""
-                INSERT INTO passwords(website, password, created, modified) 
-                VALUES ('{cleanedDomain}', '{hashed}', '{dateCreated}', '{dateModified}')
+                INSERT INTO passwords(website, password, created, modified)
+                VALUES ('{cleanedDomain}', '{hashed}',
+                        '{dateCreated}', '{dateModified}')
             """
     try:
         cursor.execute(query)
@@ -40,7 +43,7 @@ def removeRecord(domain):
     cleanedDomain = domain.upper()
 
     query = f"""
-                DELETE FROM passwords 
+                DELETE FROM passwords
                 WHERE website = '{cleanedDomain}'
             """
 
@@ -60,12 +63,11 @@ def updateRecord(domain):
     @refs       https://www.mysqltutorial.org/mysql-exists/
     '''
 
-    # Check for existing domain, then ask for new password
     cleanedDomain = domain.upper()
 
     query = f"""
-                SELECT COUNT(*) 
-                FROM passwords 
+                SELECT COUNT(*)
+                FROM passwords
                 WHERE website = '{cleanedDomain}'
             """
 
@@ -78,8 +80,8 @@ def updateRecord(domain):
 
         try:
             query = f"""
-                        UPDATE passwords 
-                        SET password = '{newPassword}', modified = '{today}' 
+                        UPDATE passwords
+                        SET password = '{hashed}', modified = '{today}'
                         WHERE website = '{cleanedDomain}'
                     """
             cursor.execute(query)
@@ -91,3 +93,19 @@ def updateRecord(domain):
     else:
         choice = input('Record not found, please try again...')
         updateRecord(choice)
+
+
+def showRecords():
+    '''
+    @desc       Display all records in passwords Table of database \n
+    @returns    None \n
+    '''
+
+    query = f"""
+                SELECT *
+                FROM passwords
+            """
+
+    rows = cursor.execute(query).fetchall()
+    for row in rows:
+        print(row)
