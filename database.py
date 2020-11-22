@@ -1,5 +1,6 @@
 import sqlite3 as sql
 import bcrypt
+import time
 from datetime import date
 
 
@@ -41,19 +42,24 @@ def removeRecord(domain):
     '''
 
     cleanedDomain = domain.upper()
+    if(checkIfRecordExists(cleanedDomain)):
+        query = f"""
+                    DELETE FROM passwords
+                    WHERE website = '{cleanedDomain}'
+                """
 
-    query = f"""
-                DELETE FROM passwords
-                WHERE website = '{cleanedDomain}'
-            """
-
-    try:
-        cursor.execute(query)
-        connection.commit()
-        print('Record has been deleted sucessfully')
-    except Exception as e:
-        print('ERROR OCCURED WHILE DELETING TO DATABASE: ' + str(e))
-
+        try:
+            cursor.execute(query)
+            connection.commit()
+            print('Record has been deleted sucessfully')
+            print('Showing updated records...')
+            time.sleep(2)
+            showRecords()
+            
+        except Exception as e:
+            print('ERROR OCCURED WHILE DELETING TO DATABASE: ' + str(e))
+    else:
+        print("Record does not exist")
 
 def updateRecord(domain):
     '''
@@ -64,14 +70,7 @@ def updateRecord(domain):
     '''
 
     cleanedDomain = domain.upper()
-
-    query = f"""
-                SELECT COUNT(*)
-                FROM passwords
-                WHERE website = '{cleanedDomain}'
-            """
-
-    if (cursor.execute(query).fetchall()[0][0] == 1):
+    if (checkIfRecordExists(cleanedDomain)):
         print('record found')
 
         newPassword = input('Enter a new password combination for this record')
@@ -94,13 +93,15 @@ def updateRecord(domain):
         choice = input('Record not found, please try again...')
         updateRecord(choice)
 
-
 def showRecords():
     '''
     @desc       Display all records in passwords Table of database \n
     @returns    None \n
     '''
-
+    print("Loading...")
+    time.sleep(3)
+    print("DOMAIN\tHashed\tCreatedOn\tModifiedOn");
+    
     query = f"""
                 SELECT *
                 FROM passwords
@@ -109,3 +110,26 @@ def showRecords():
     rows = cursor.execute(query).fetchall()
     for row in rows:
         print(row)
+
+def checkIfRecordExists(domainName):
+    '''
+    @desc       Checks if a record exists in the PASWORDS table
+    @params     String: Domain name
+    @returns    Boolean if anything has been found
+    '''
+    domainName = domainName.upper()
+
+    try:
+        query = f"""
+                    SELECT COUNT(*)
+                    FROM passwords
+                    WHERE website = '{domainName}'
+                """
+        if (cursor.execute(query).fetchall()[0][0] == 1):
+            return True
+        else:
+            return False
+
+    except Exception as e:
+        print('ERROR OCCURED WHILE TRYING TO CHECK DOCUMENT EXISTANCE: ' + str(e))
+

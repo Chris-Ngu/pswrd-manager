@@ -25,7 +25,7 @@ def chooseChoice(choice):
         handleRegister()
 
     elif choice == 2:
-        print('choice 2')
+        handleRemove()
 
     elif choice == 3:
         print('choice 3')
@@ -50,6 +50,14 @@ def handleRegister():
 
     database.addRecord(domain, password)
 
+def handleRemove():
+    while True:
+        domain = input('What domain would you like to delete?');
+        choice = int(input('Are you sure about these combinations? \n1: YES Else: NO\n'))
+        if choice == 1:
+            break
+
+    database.removeRecord(domain)
 
 if __name__ == '__main__':
     main()
